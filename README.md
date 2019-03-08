@@ -19,7 +19,7 @@ Head Database is based on [Arcaniax' Head Database for Spigot](https://www.spigo
 - /hdb | /hdb open : Opens the main menu
 - /hdb find [query] : Shows all heads with tags or names matching a given query
 
-### Custom Heads collected from https://minecraft-heads.com/
+##### Custom Heads collected from https://minecraft-heads.com/
 
 ## Dependencies
 **TeslaPowered by Simon_Flash**
@@ -27,3 +27,10 @@ Head Database is based on [Arcaniax' Head Database for Spigot](https://www.spigo
 Ore : [Simon_Flash / TeslaPowered](https://ore.spongepowered.org/Simon_Flash/TeslaPowered)
 
 GitHub : [SimonFlash / TeslaPowered](https://github.com/SimonFlash/TeslaPowered)
+
+## Screenshots
+![menu overview](https://i.imgur.com/6MkEKef.png "Default Menu")
+
+![category overview](https://i.imgur.com/4G9B8iO.png "Page 5 of the Food category")
+
+![search overview](https://i.imgur.com/x2JKSyb.png "Search results for keyword 'Santa'")
