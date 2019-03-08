@@ -13,6 +13,7 @@ Head Database is based on [Arcaniax' Head Database for Spigot](https://www.spigo
 - [Category] Community Heads : Allow users to add a custom head they have in their hand to a local config file (JSON)
 - [Category] Server Heads : Allow server owners to add a custom head in a local config file (JSON)
 - [Child-command] 'random [amount]' : Display a given amount of random heads in a Virtual GUI
+- [Economy] (Suggested by Runescapejon) Buyable heads : add a price to use each head. Store bought head uuids for Players
 - Suggestions? DM me on Discord ( @Ethereal_#7648 ) or leave a comment on this thread
 
 ## Commands
