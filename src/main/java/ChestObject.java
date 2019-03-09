@@ -172,6 +172,7 @@ public class ChestObject {
       } catch (NumberFormatException | InstantiationException ex) {
         ex.printStackTrace();
         incorrectSkulls++;
+        System.out.println("Incorrect head UUID : '" + headObject.getUuid() + "'");
       }
     }
 

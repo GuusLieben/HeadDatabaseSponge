@@ -6,7 +6,7 @@
 
     <groupId>com.exludit</groupId>
     <artifactId>headdatabase</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.5</version>
     <build>
         <plugins>
             <plugin>

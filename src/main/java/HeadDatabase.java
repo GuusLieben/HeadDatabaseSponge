@@ -59,6 +59,10 @@ public class HeadDatabase {
 
   static String apiLine = "https://minecraft-heads.com/scripts/api.php?tags=true&cat=";
 
+  static String[] uuidBlacklist = {
+    "c7299fa8d44b "
+  }; // UUID's causing NumberFormatExceptions, currently only one exists in the entire database
+
   private void collectHeadsFromAPI() throws IOException {
     int totalHeads = 0;
     for (HeadObject.Category cat : HeadObject.Category.values()) {
@@ -78,8 +82,13 @@ public class HeadDatabase {
           String value = valueEl.getAsString();
           String tags = tagsEl instanceof JsonNull ? "None" : tagsEl.getAsString();
 
-          new HeadObject(name, uuid, value, tags, cat);
-          totalHeads++;
+          boolean doAdd = true;
+          for (String blackedUUID : uuidBlacklist) if (blackedUUID.equals(uuid)) doAdd = false;
+
+          if (doAdd) {
+            new HeadObject(name, uuid, value, tags, cat);
+            totalHeads++;
+          }
         }
       }
     }
