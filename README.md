@@ -13,13 +13,14 @@ Head Database is based on [Arcaniax' Head Database for Spigot](https://www.spigo
 - [Category] Community Heads : Allow users to add a custom head they have in their hand to a local config file (JSON)
 - [Category] Server Heads : Allow server owners to add a custom head in a local config file (JSON)
 - [Child-command] 'random [amount]' : Display a given amount of random heads in a Virtual GUI
+- [Economy] (Suggested by Runescapejon) Buyable heads : add a price to use each head. Store bought head uuids for Players
 - Suggestions? DM me on Discord ( @Ethereal_#7648 ) or leave a comment on this thread
 
 ## Commands
 - /hdb | /hdb open : Opens the main menu
 - /hdb find [query] : Shows all heads with tags or names matching a given query
 
-### Custom Heads collected from https://minecraft-heads.com/
+##### Custom Heads collected from https://minecraft-heads.com/
 
 ## Dependencies
 **TeslaPowered by Simon_Flash**
@@ -27,3 +28,10 @@ Head Database is based on [Arcaniax' Head Database for Spigot](https://www.spigo
 Ore : [Simon_Flash / TeslaPowered](https://ore.spongepowered.org/Simon_Flash/TeslaPowered)
 
 GitHub : [SimonFlash / TeslaPowered](https://github.com/SimonFlash/TeslaPowered)
+
+## Screenshots
+![menu overview](https://i.imgur.com/6MkEKef.png "Default Menu")
+
+![category overview](https://i.imgur.com/4G9B8iO.png "Page 5 of the Food category")
+
+![search overview](https://i.imgur.com/x2JKSyb.png "Search results for keyword 'Santa'")
