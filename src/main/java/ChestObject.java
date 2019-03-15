@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 public class ChestObject {
 
   private static PluginContainer container =
-      Sponge.getPluginManager().getPlugin("hdb").orElse(null);
+      Sponge.getPluginManager().getPlugin("headsevolved").orElse(null);
 
   public ChestObject(Player player) throws InstantiationException {
     Layout.Builder builder = new Layout.Builder().dimension(InventoryDimension.of(9, 6));
@@ -72,7 +72,7 @@ public class ChestObject {
     View view =
         View.builder()
             .archetype(archetype)
-            .property(InventoryTitle.of(Text.of(TextColors.AQUA, "Head Database")))
+            .property(InventoryTitle.of(Text.of(TextColors.AQUA, "Heads Evolved")))
             .build(container)
             .define(layout);
 
@@ -149,7 +149,7 @@ public class ChestObject {
     Page page =
         Page.builder()
             .layout(layout)
-            .property(InventoryTitle.of(Text.of(TextColors.AQUA, "Head Database")))
+            .property(InventoryTitle.of(Text.of(TextColors.AQUA, "Heads Evolved")))
             .build(container);
 
     int incorrectSkulls = 0;

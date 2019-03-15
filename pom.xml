@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.exludit</groupId>
-    <artifactId>headdatabase</artifactId>
-    <version>1.0.5</version>
+    <artifactId>headsevolved</artifactId>
+    <version>1.0.6</version>
     <build>
         <plugins>
             <plugin>

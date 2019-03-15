@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -12,6 +13,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
@@ -22,30 +24,37 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.Set;
 
 @Plugin(
-    id = "hdb",
-    name = "HeadDatabase",
-    version = "1.0.4",
+    id = "headsevolved",
+    name = "HeadsEvolved",
+    version = "1.0.6",
     description = "Stores custom heads for Darwin Reforged")
-public class HeadDatabase {
+public class HeadsEvolved {
 
-  private static HeadDatabase singleton;
+  private static HeadsEvolved singleton;
 
   @Listener
   public void onServerFinishLoad(GameInitializationEvent event) {
     Sponge.getEventManager().registerListeners(this, new Listeners());
-    Sponge.getCommandManager().register(this, hdbMain, "hdb");
+    Sponge.getCommandManager().register(this, hdbMain, "heads");
   }
 
   Gson gson = new Gson();
+  ConfigurationHandle handle;
+
+  @Inject
+  @ConfigDir(sharedRoot = false)
+  private Path root;
 
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
@@ -54,6 +63,8 @@ public class HeadDatabase {
     } catch (IOException e) {
       System.out.println("Failed to get head.");
     }
+    File configFile = new File(root.toFile(), "headsevolved.conf");
+    handle = new ConfigurationHandle(configFile);
     singleton = this;
   }
 
@@ -116,21 +127,21 @@ public class HeadDatabase {
     }
   }
 
-  public static HeadDatabase getSingleton() {
+  public static HeadsEvolved getSingleton() {
     return singleton;
   }
 
   private CommandSpec hdbOpen =
       CommandSpec.builder()
-          .description(Text.of("Opens HDB GUI"))
-          .permission("hdb.open")
+          .description(Text.of("Opens Head Evo GUI"))
+          .permission("he.open")
           .executor(new openInventory())
           .build();
 
   private CommandSpec hdbSearch =
       CommandSpec.builder()
           .description(Text.of("Searches for heads with matching tags or name"))
-          .permission("hdb.open")
+          .permission("he.open")
           .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("query"))))
           .executor(new searchHeads())
           .build();
@@ -138,7 +149,7 @@ public class HeadDatabase {
   private CommandSpec hdbMain =
       CommandSpec.builder()
           .description(Text.of("Main command"))
-          .permission("hdb.open")
+          .permission("he.open")
           .child(hdbOpen, "open")
           .child(hdbSearch, "find", "search")
           .build();
