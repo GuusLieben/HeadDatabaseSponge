@@ -1,6 +1,6 @@
 #### Head Database (1.12.2) - Virtual GUI for over 21.000 custom heads
 
-# Head Database
+# Heads Evolved
 Head Database is based on [Arcaniax' Head Database for Spigot](https://www.spigotmc.org/resources/head-database.14280/).
 
 ## Currently includes
