@@ -5,6 +5,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.inject.Inject;
+import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -45,7 +46,6 @@ public class HeadsEvolved {
 
   @Listener
   public void onServerFinishLoad(GameInitializationEvent event) {
-    Sponge.getEventManager().registerListeners(this, new Listeners());
     Sponge.getCommandManager().register(this, hdbMain, "heads");
   }
 
@@ -53,19 +53,22 @@ public class HeadsEvolved {
   ConfigurationHandle handle;
 
   @Inject
+  public Logger logger;
+
+  @Inject
   @ConfigDir(sharedRoot = false)
   private Path root;
 
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
+    singleton = this;
     try {
       collectHeadsFromAPI();
     } catch (IOException e) {
-      System.out.println("Failed to get head.");
+      HeadsEvolved.getSingleton().logger.debug("Failed to get head.");
     }
     File configFile = new File(root.toFile(), "headsevolved.conf");
     handle = new ConfigurationHandle(configFile);
-    singleton = this;
   }
 
   static String apiLine = "https://minecraft-heads.com/scripts/api.php?tags=true&cat=";
@@ -79,7 +82,7 @@ public class HeadsEvolved {
     for (HeadObject.Category cat : HeadObject.Category.values()) {
       String connectionLine = apiLine + cat.toString().toLowerCase().replaceAll("_", "-");
       JsonArray array = readJsonFromUrl(connectionLine);
-      System.out.println(cat.toString() + " : " + array.size());
+      HeadsEvolved.getSingleton().logger.debug(cat.toString() + " : " + array.size());
 
       for (Object head : array) {
         if (head instanceof JsonObject) {
@@ -104,7 +107,7 @@ public class HeadsEvolved {
       }
     }
 
-    System.out.println("\nCollected : " + totalHeads + " heads from MinecraftHeadDB");
+    HeadsEvolved.getSingleton().logger.debug("\nCollected : " + totalHeads + " heads from MinecraftHeadDB");
   }
 
   private String readAll(Reader rd) throws IOException {

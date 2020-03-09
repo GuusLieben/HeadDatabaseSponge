@@ -1,19 +1,21 @@
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ConfigurationHandle {
 
-  private JsonObject storedJson;
+  private ItemStack[] storedJson;
 
   public ConfigurationHandle(File file) {
-    boolean fileExisted = true;
-
     if (!file.exists()) {
       file.getParentFile().mkdirs();
       try {
@@ -21,22 +23,18 @@ public class ConfigurationHandle {
       } catch (IOException e) {
         e.printStackTrace();
       }
-      fileExisted = false;
-    }
-
-    if (!fileExisted) {
-      // Write the default values
     }
 
     try {
-      String triggerJson = new String(Files.readAllBytes(Paths.get(file.getPath())), "UTF-8");
-      storedJson = (JsonObject) new JsonParser().parse(triggerJson);
+      FileReader reader = new FileReader(file);
+      this.storedJson = new Gson().fromJson(reader, ItemStack[].class);
+
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  public JsonElement getJsonElement(String key) {
-    return storedJson.get(key);
+  public ItemStack[] getCustomHeads() {
+    return this.storedJson;
   }
 }

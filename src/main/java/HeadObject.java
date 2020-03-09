@@ -62,34 +62,28 @@ public class HeadObject {
   }
 
   public static Set<HeadObject> getByNameAndTag(String query) {
-    Set<HeadObject> headObjectsWithNameOrTags =
-        headObjectSet.stream()
-            .filter(
-                object -> {
-                  for (String tag : object.getTags()) {
-                    if (tag.toLowerCase().contains(query.toLowerCase())) return true;
-                  }
-                  if (object.getName().toLowerCase().contains(query.toLowerCase())) return true;
-                  return false;
-                })
-            .collect(Collectors.toSet());
-    return headObjectsWithNameOrTags;
+    return headObjectSet.stream()
+        .filter(
+            object -> {
+              for (String tag : object.getTags()) {
+                if (tag.toLowerCase().contains(query.toLowerCase())) return true;
+              }
+              if (object.getName().toLowerCase().contains(query.toLowerCase())) return true;
+              return false;
+            })
+        .collect(Collectors.toSet());
   }
 
   public static Set<HeadObject> getByCategory(Category category) {
-    Set<HeadObject> headObjectsWithCategory =
-        headObjectSet.stream()
-            .filter(object -> object.getCategory() == category)
-            .collect(Collectors.toSet());
-    return headObjectsWithCategory;
+    return headObjectSet.stream()
+        .filter(object -> object.getCategory() == category)
+        .collect(Collectors.toSet());
   }
 
   public static Set<HeadObject> getByNameIncludes(String name) {
-    Set<HeadObject> headObjectsWithNameIncludes =
-        headObjectSet.stream()
-            .filter(object -> object.getName().toLowerCase().contains(name.toLowerCase()))
-            .collect(Collectors.toSet());
-    return headObjectsWithNameIncludes;
+    return headObjectSet.stream()
+        .filter(object -> object.getName().toLowerCase().contains(name.toLowerCase()))
+        .collect(Collectors.toSet());
   }
 
   @Override
