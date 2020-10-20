@@ -1,8 +1,11 @@
+package nl.guuslieben.headsevolved;
+
 import com.mcsimonflash.sponge.teslalibs.inventory.Action;
 import com.mcsimonflash.sponge.teslalibs.inventory.Element;
 import com.mcsimonflash.sponge.teslalibs.inventory.Layout;
 import com.mcsimonflash.sponge.teslalibs.inventory.Page;
 import com.mcsimonflash.sponge.teslalibs.inventory.View;
+
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -35,39 +38,61 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import nl.guuslieben.headsevolved.HeadObject.Category;
+
 public class ChestObject {
 
-  private static PluginContainer container =
+  private static final PluginContainer container =
       Sponge.getPluginManager().getPlugin("headsevolved").orElse(null);
 
   public ChestObject(Player player) throws InstantiationException {
-    Layout.Builder builder = new Layout.Builder().dimension(InventoryDimension.of(9, 6));
 
-    setMenuItem(builder, HeadObject.Category.ALPHABET, 20);
-    setMenuItem(builder, HeadObject.Category.ANIMALS, 21);
-    setMenuItem(builder, HeadObject.Category.BLOCKS, 22);
-    setMenuItem(builder, HeadObject.Category.DECORATION, 23);
-    setMenuItem(builder, HeadObject.Category.FOOD_DRINKS, 24);
-
-    setMenuItem(builder, HeadObject.Category.HUMANS, 29);
-    setMenuItem(builder, HeadObject.Category.HUMANOID, 30);
-    setMenuItem(builder, HeadObject.Category.MISCELLANEOUS, 31);
-    setMenuItem(builder, HeadObject.Category.MONSTERS, 32);
-    setMenuItem(builder, HeadObject.Category.PLANTS, 33);
+    List<Category> permittedCategories = new ArrayList<>();
+    for (HeadObject.Category cat : HeadObject.Category.values()) {
+      if (player.hasPermission("he.category." + cat.toString().toLowerCase())) permittedCategories.add(cat);
+    }
+    boolean twoRows = permittedCategories.size() > 5;
 
     BlockState state =
-        BlockState.builder()
-            .blockType(BlockTypes.STAINED_GLASS_PANE)
-            .build()
-            .with(Keys.DYE_COLOR, DyeColors.BLACK)
-            .get();
+            BlockState.builder()
+                    .blockType(BlockTypes.STAINED_GLASS_PANE)
+                    .build()
+                    .with(Keys.DYE_COLOR, DyeColors.BLACK)
+                    .get();
 
     ItemStack border = ItemStack.builder().fromBlockState(state).build();
+    Layout.Builder builder = new Layout.Builder().dimension(InventoryDimension.of(9, (twoRows) ? 6 : 3));
+    builder.border(Element.of(border));
 
-    builder.border(Element.of(border)).set(Element.EMPTY, 10, 16, 19, 25);
+    InventoryArchetype archetype = twoRows ? InventoryArchetypes.DOUBLE_CHEST : InventoryArchetypes.CHEST;
+
+    int permittedSize = permittedCategories.size();
+
+    if (permittedSize > 0) {
+      // I know it's not the prettiest, but it gets the job done
+      int nextIndex = 20;
+      if (!twoRows) {
+        if (permittedSize <= 1) nextIndex = 13;
+        else if (permittedSize <= 3) nextIndex = 12;
+        else if (permittedSize <= 5) nextIndex = 11;
+      }
+      int indexStart2 = 29;
+
+      for (HeadObject.Category cat : HeadObject.Category.values()) {
+        if (player.hasPermission("he.category." + cat.toString().toLowerCase())) {
+          setMenuItem(builder, cat, nextIndex);
+
+          if (nextIndex == 24) nextIndex = indexStart2;
+          else nextIndex++;
+        }
+      }
+    } else {
+      ItemStack disallowed = ItemStack.builder().fromBlockState(BlockState.builder().blockType(BlockTypes.BARRIER).build()).build();
+      disallowed.offer(Keys.DISPLAY_NAME, Text.of(TextColors.RED, "You are not allowed to view categories"));
+      builder.set(Element.of(disallowed), 13);
+    }
 
     Layout layout = builder.build();
-    InventoryArchetype archetype = InventoryArchetypes.DOUBLE_CHEST;
 
     View view =
         View.builder()
@@ -80,25 +105,25 @@ public class ChestObject {
   }
 
   private Layout.Builder setMenuItem(Layout.Builder layout, HeadObject.Category category, int index)
-      throws InstantiationException, NumberFormatException {
+          throws InstantiationException, NumberFormatException {
     HeadObject headObject = HeadObject.getFirstFromCategory(category);
     int size = HeadObject.getByCategory(category).size();
     ItemStack stack =
-        headObject != null ? getSkullStack(headObject) : ItemStack.of(ItemTypes.BARRIER);
+            headObject != null ? getSkullStack(headObject) : ItemStack.of(ItemTypes.BARRIER);
     stack.offer(
-        Keys.DISPLAY_NAME,
-        Text.of(TextColors.AQUA, StringUtils.capitalize(category.toString().toLowerCase())));
+            Keys.DISPLAY_NAME,
+            Text.of(TextColors.AQUA, StringUtils.capitalize(category.toString().toLowerCase())));
 
     List<Text> lore =
-        new ArrayList<Text>() {
-          {
-            add(Text.of(TextColors.DARK_AQUA, size + " heads"));
-          }
-        };
+            new ArrayList<Text>() {
+              {
+                add(Text.of(TextColors.DARK_AQUA, size + " heads"));
+              }
+            };
     stack.offer(Keys.ITEM_LORE, lore);
 
     Consumer<Action.Click> action =
-        a -> openViewForSet(HeadObject.getByCategory(category), a.getPlayer(), category.toString());
+            a -> openViewForSet(HeadObject.getByCategory(category), a.getPlayer(), category.toString());
     Element element = Element.of(stack, action);
     layout.set(element, index);
     return layout;
@@ -182,7 +207,7 @@ public class ChestObject {
       player.sendMessage(
           Text.of(
               TextColors.RED,
-              "Failed to load " + incorrectSkulls + " heads, please report this to EthereaI_"));
+              "Failed to load " + incorrectSkulls + " heads, please report this to our Discord. https://discord.gg/MQvBXVM"));
 
     page.open(player);
   }

@@ -1,10 +1,12 @@
-import com.google.gson.Gson;
+package nl.guuslieben.headsevolved;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.inject.Inject;
+
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -14,7 +16,6 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
@@ -25,50 +26,52 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 @Plugin(
-    id = "headsevolved",
-    name = "HeadsEvolved",
-    version = "1.0.6",
-    description = "Stores custom heads for Darwin Reforged")
+        id = "headsevolved",
+        name = "nl.guuslieben.headsevolved.HeadsEvolved",
+        version = "1.0.10",
+        description = "Stores custom heads for Darwin Reforged")
 public class HeadsEvolved {
 
   private static HeadsEvolved singleton;
+  private static boolean obtained = false;
+  private static boolean initiated = true;
 
   @Listener
   public void onServerFinishLoad(GameInitializationEvent event) {
-    Sponge.getCommandManager().register(this, hdbMain, "heads");
+    try {
+      Class.forName("com.mcsimonflash.sponge.teslalibs.inventory.Layout");
+      Sponge.getCommandManager().register(this, hdbMain, "heads", "he", "hdb");
+    } catch (ClassNotFoundException e) {
+      logger.error("Could not find TeslaLibs! Not registering commands");
+      initiated = false;
+    }
   }
-
-  Gson gson = new Gson();
-  ConfigurationHandle handle;
 
   @Inject
   public Logger logger;
 
-  @Inject
-  @ConfigDir(sharedRoot = false)
-  private Path root;
-
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
-    singleton = this;
-    try {
-      collectHeadsFromAPI();
-    } catch (IOException e) {
-      HeadsEvolved.getSingleton().logger.debug("Failed to get head.");
+    if (initiated) {
+      singleton = this;
+      logger.info("Starting head database request task");
+      Sponge.getScheduler().createTaskBuilder().async().name("he_obtain").execute(() -> {
+        try {
+          collectHeadsFromAPI();
+        } catch (IOException e) {
+          logger.debug("Failed to get head.");
+        }
+      }).submit(this);
     }
-    File configFile = new File(root.toFile(), "headsevolved.conf");
-    handle = new ConfigurationHandle(configFile);
   }
 
   static String apiLine = "https://minecraft-heads.com/scripts/api.php?tags=true&cat=";
@@ -78,11 +81,12 @@ public class HeadsEvolved {
   }; // UUID's causing NumberFormatExceptions, currently only one exists in the entire database
 
   private void collectHeadsFromAPI() throws IOException {
+    logger.debug("(async) Obtaining heads...");
     int totalHeads = 0;
     for (HeadObject.Category cat : HeadObject.Category.values()) {
       String connectionLine = apiLine + cat.toString().toLowerCase().replaceAll("_", "-");
       JsonArray array = readJsonFromUrl(connectionLine);
-      HeadsEvolved.getSingleton().logger.debug(cat.toString() + " : " + array.size());
+      logger.debug(cat.toString() + " : " + array.size());
 
       for (Object head : array) {
         if (head instanceof JsonObject) {
@@ -107,7 +111,8 @@ public class HeadsEvolved {
       }
     }
 
-    HeadsEvolved.getSingleton().logger.debug("\nCollected : " + totalHeads + " heads from MinecraftHeadDB");
+    logger.debug("\nCollected : " + totalHeads + " heads from MinecraftHeadDB");
+    obtained = true;
   }
 
   private String readAll(Reader rd) throws IOException {
@@ -120,18 +125,11 @@ public class HeadsEvolved {
   }
 
   public JsonArray readJsonFromUrl(String url) throws IOException {
-    InputStream is = new URL(url).openStream();
-    try {
-      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+    try (InputStream is = new URL(url).openStream()) {
+      BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
       String jsonText = readAll(rd);
       return (JsonArray) new JsonParser().parse(jsonText);
-    } finally {
-      is.close();
     }
-  }
-
-  public static HeadsEvolved getSingleton() {
-    return singleton;
   }
 
   private CommandSpec hdbOpen =
@@ -142,9 +140,9 @@ public class HeadsEvolved {
           .build();
 
   private CommandSpec hdbSearch =
-      CommandSpec.builder()
-          .description(Text.of("Searches for heads with matching tags or name"))
-          .permission("he.open")
+          CommandSpec.builder()
+                  .description(Text.of("Searches for heads with matching tags or name"))
+                  .permission("he.find")
           .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("query"))))
           .executor(new searchHeads())
           .build();
@@ -162,7 +160,9 @@ public class HeadsEvolved {
     @Override
     @NonnullByDefault
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-      if (src instanceof Player) {
+      if (!obtained)
+        src.sendMessage(Text.of(TextColors.GRAY, "// ", TextColors.RED, "Still obtaining heads from database, please wait.."));
+      else if (src instanceof Player) {
         Player player = (Player) src;
         String query = args.<String>getOne("query").get();
         if (query != "") {
@@ -179,13 +179,15 @@ public class HeadsEvolved {
     @Override
     @NonnullByDefault
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-      if (src instanceof Player) {
+      if (!obtained)
+        src.sendMessage(Text.of(TextColors.GRAY, "// ", TextColors.RED, "Still obtaining heads from database, please wait.."));
+      else if (src instanceof Player) {
         Player player = (Player) src;
         try {
           new ChestObject(player);
         } catch (InstantiationException e) {
           player.sendMessage(
-              Text.of(TextColors.GRAY, "// ", TextColors.RED, "Failed to open Head Database GUI"));
+                  Text.of(TextColors.GRAY, "// ", TextColors.RED, "Failed to open Head Database GUI"));
         }
       }
       return CommandResult.success();

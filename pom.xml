@@ -6,7 +6,7 @@
 
     <groupId>com.exludit</groupId>
     <artifactId>headsevolved</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.10</version>
     <build>
         <plugins>
             <plugin>
