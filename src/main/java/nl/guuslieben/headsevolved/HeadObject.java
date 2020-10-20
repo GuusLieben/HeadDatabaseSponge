@@ -18,13 +18,13 @@ public class HeadObject {
     PLANTS
   }
 
-  private static Set<HeadObject> headObjectSet = new HashSet<>();
+  private static final Set<HeadObject> headObjectSet = new HashSet<>();
 
-  private String name;
-  private String uuid;
-  private String value;
-  private Category category;
-  private String[] tags;
+  private final String name;
+  private final String uuid;
+  private final String value;
+  private final Category category;
+  private final String[] tags;
 
   public HeadObject(String name, String uuid, String value, String tags, Category category) {
     this.name = name;
@@ -37,6 +37,10 @@ public class HeadObject {
 
   public static Set<HeadObject> getHeadObjectSet() {
     return headObjectSet;
+  }
+
+  public static void resetSet() {
+    headObjectSet.clear();
   }
 
   public String getName() {
@@ -70,8 +74,7 @@ public class HeadObject {
               for (String tag : object.getTags()) {
                 if (tag.toLowerCase().contains(query.toLowerCase())) return true;
               }
-              if (object.getName().toLowerCase().contains(query.toLowerCase())) return true;
-              return false;
+              return object.getName().toLowerCase().contains(query.toLowerCase());
             })
         .collect(Collectors.toSet());
   }
