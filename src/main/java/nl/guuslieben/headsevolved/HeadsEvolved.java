@@ -38,8 +38,8 @@ import java.util.Set;
 @Plugin(
         id = "headsevolved",
         name = "nl.guuslieben.headsevolved.HeadsEvolved",
-        version = "1.0.10",
-        description = "Stores custom heads for Darwin Reforged")
+        version = "@version@",
+        description = "Stores custom heads for Darwin Reforged.")
 public class HeadsEvolved {
 
   private static HeadsEvolved singleton;
@@ -128,7 +128,7 @@ public class HeadsEvolved {
 
   public static JsonArray readJsonFromUrl(String url) throws IOException {
       URLConnection urlcon = new URL(url).openConnection();
-      urlcon.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0");
+      urlcon.setRequestProperty("User-Agent", "HeadsEvolved_v@version@");
       try (
               InputStream is = urlcon.getInputStream();
               BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
