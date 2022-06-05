@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
@@ -126,12 +127,14 @@ public class HeadsEvolved {
   }
 
   public static JsonArray readJsonFromUrl(String url) throws IOException {
-    try (
-            InputStream is = new URL(url).openStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-      String jsonText = readAll(rd);
-      return (JsonArray) new JsonParser().parse(jsonText);
-    }
+      URLConnection urlcon = new URL(url).openConnection();
+      urlcon.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0");
+      try (
+              InputStream is = urlcon.getInputStream();
+              BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+        String jsonText = readAll(rd);
+        return (JsonArray) new JsonParser().parse(jsonText);
+      }
   }
 
   private CommandSpec hdbOpen =
