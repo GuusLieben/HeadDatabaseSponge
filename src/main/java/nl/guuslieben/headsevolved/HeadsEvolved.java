@@ -31,14 +31,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 @Plugin(
         id = "headsevolved",
         name = "nl.guuslieben.headsevolved.HeadsEvolved",
-        version = "1.0.10",
-        description = "Stores custom heads for Darwin Reforged")
+        version = "@version@",
+        description = "Stores custom heads for Darwin Reforged.")
 public class HeadsEvolved {
 
   private static HeadsEvolved singleton;
@@ -126,12 +127,14 @@ public class HeadsEvolved {
   }
 
   public static JsonArray readJsonFromUrl(String url) throws IOException {
-    try (
-            InputStream is = new URL(url).openStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-      String jsonText = readAll(rd);
-      return (JsonArray) new JsonParser().parse(jsonText);
-    }
+      URLConnection urlcon = new URL(url).openConnection();
+      urlcon.setRequestProperty("User-Agent", "HeadsEvolved_v@version@");
+      try (
+              InputStream is = urlcon.getInputStream();
+              BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+        String jsonText = readAll(rd);
+        return (JsonArray) new JsonParser().parse(jsonText);
+      }
   }
 
   private CommandSpec hdbOpen =

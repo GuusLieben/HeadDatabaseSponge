@@ -1,21 +1,36 @@
 plugins {
     id 'java'
-    id 'org.spongepowered.plugin' version '0.9.0'
+    id "org.spongepowered.gradle.plugin" version "0.11.5"
+    id "net.kyori.blossom" version "1.+"
 }
 
 // This may not be required, but has solved issues in the past
 compileJava.options.encoding = 'UTF-8'
 
-group = 'nl.guuslieben'
-version = '1.0.12'
-description = 'Stores custom heads for Darwin Reforged'
+group = project.properties['prop.group']
+version = project.properties['prop.version']
+description = project.properties['prop.description']
+
+blossom {
+    replaceToken("@version@", project.properties['prop.version'])
+}
 
 repositories {
-    jcenter()
+    mavenLocal()
+    mavenCentral()
+    maven {
+        name = "Gradle-Plugins"
+        url = "https://plugins.gradle.org/m2"
+    }
+    maven {
+        name = "Sponge"
+        url = "https://repo.spongepowered.org/maven"
+    }
 }
 
 dependencies {
-    compile 'org.spongepowered:spongeapi:7.2.0'
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation("org.spongepowered:spongeapi:"+project.properties['prop.spongeapi'])
+    annotationProcessor("org.spongepowered:spongeapi:"+project.properties['prop.spongeapi'])
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.7'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
